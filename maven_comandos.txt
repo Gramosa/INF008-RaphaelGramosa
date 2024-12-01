@@ -1,0 +1,4 @@
+mvn -> Comando base do maven
+
+mvn clean compile
+java -cp target/classes App
