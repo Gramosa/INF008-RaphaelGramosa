@@ -14,6 +14,10 @@ public class Order implements Serializable{
         this.creationDate = LocalDateTime.now();
     }
 
+    public int getId(){
+        return id;
+    }
+
     public void addProduct(Product product, int ammount){
         items.add(new OrderItem(product, ammount));
     }

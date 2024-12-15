@@ -27,7 +27,24 @@ public class Product implements Serializable {
         return price;
     }
 
-    public void updateStock(int ammount){
+    public int getId(){
+        return id;
+    }
+
+    public int getStock(){
+        return stock;
+    }
+
+    public boolean canUpdateStock(int ammount){
+        return this.stock + ammount >= 0;
+    }
+
+    public boolean updateStock(int ammount){
+        if(!canUpdateStock(ammount)){
+            return false;
+        }
+
         this.stock += ammount;
+        return true;
     }
 }
