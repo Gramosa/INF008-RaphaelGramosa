@@ -2,23 +2,21 @@ import java.util.ArrayList;
 import java.lang.Runnable;
 
 public class Menu {
-    private String key;
     private String title;
     private String description;
     private Menu parent;
     private ArrayList<Menu> subMenus = new ArrayList<Menu>();
     private Runnable action;
 
-    public Menu(String key, String title, String description){
-        this.key = key;
+    public Menu(String title){
         this.title = title;
-        this.description = description;
         this.action = null;
         this.parent = null;
     }
 
-    public String getKey(){
-        return this.key;
+    public Menu(String title, String description){
+        this(title);
+        this.description = description;
     }
 
     public String getDescription(){
@@ -58,22 +56,16 @@ public class Menu {
         return true;
     }
 
-    public boolean haveChildren(){
-        return subMenus.size() != 0;
+    public int numberChildren(){
+        return subMenus.size();
     }
 
-    public Menu go(String key){
-        if(key == ".."){
+    public Menu go(String index){
+        if(index == "0"){
             return parent;
         }
 
-        for(Menu subMenu : subMenus){
-            if(subMenu.getKey() == key){
-                return subMenu;
-            }
-        }
-
-        return null;
+        return subMenus.get(Integer.parseInt(index) - 1);
     }
 
     public void display(){
@@ -101,6 +93,7 @@ public class Menu {
             System.out.println(line);
         }
 
+        System.out.println("| 0 - return");
         System.out.println("=".repeat(biggestDescription));
     }
 }

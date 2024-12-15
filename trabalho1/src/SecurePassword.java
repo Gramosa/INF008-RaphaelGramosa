@@ -8,6 +8,12 @@ public class SecurePassword {
     private byte[] cryptPassword;
     private byte[] salt = new byte[16];
 
+    public SecurePassword(){}
+
+    public SecurePassword(String saltString){
+        this.salt = Base64.getDecoder().decode(saltString);
+    }
+
     private void generateSalt(){
         SecureRandom random = new SecureRandom();
         random.nextBytes(salt);

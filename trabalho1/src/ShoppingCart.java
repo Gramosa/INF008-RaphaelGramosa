@@ -14,7 +14,7 @@ public class ShoppingCart implements Serializable {
 
     public void updateItem(int productId, int ammount){
         if(ammount <= 0){
-            System.out.println("Não é possível comprar produtos com uma quantidade negativa");
+            System.out.println("Cant add a negative ammount");
             return;
         }
 
