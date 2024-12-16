@@ -9,11 +9,20 @@ abstract public class User implements Serializable {
     private String email;
     private SecurePassword password;
 
+    public static int getUserCount(){
+        return userCount;
+    }
+
+    public static void setUserCount(int value){
+        userCount = value;
+    }
+
     public User(String name, String email, String password) throws NoSuchAlgorithmException{
         this.name = name;
         this.email = email;
 
         this.password = new SecurePassword();
+        this.password.generateSalt();
         this.password.hashPassword(password);
         
         this.id = userCount++;
@@ -30,4 +39,9 @@ abstract public class User implements Serializable {
     public SecurePassword getSecurePassword(){
         return this.password;
     }
+
+    public String toText() {
+        return String.format("User ID: %d\nName: %s\nEmail: %s", id, name, email);
+    }
+    
 }

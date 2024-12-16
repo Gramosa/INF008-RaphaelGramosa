@@ -20,4 +20,8 @@ public class ShoppingCart implements Serializable {
 
         items.put(productId, ammount);
     }
+
+    public int getCartLenght(){
+        return items.size();
+    }
 }

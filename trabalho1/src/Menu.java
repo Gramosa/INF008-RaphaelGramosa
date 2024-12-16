@@ -48,7 +48,7 @@ public class Menu {
 
     public boolean executeAction(){
         if(action == null){
-            System.out.println("There is no action defined to this menu");
+            //System.out.println("There is no action defined to this menu");
             return false;
         }
 
@@ -61,7 +61,8 @@ public class Menu {
     }
 
     public Menu go(String index){
-        if(index == "0"){
+        // System.out.println("go: " + index);
+        if(index.equals("0")){
             return parent;
         }
 
@@ -71,29 +72,37 @@ public class Menu {
     public void display(){
         int biggestDescription = 0;
         int titleSize = title.length();
-
+    
         for(Menu subMenu: subMenus){
             int size = subMenu.title.length();
             if(size > biggestDescription){
                 biggestDescription = size;
             }
         }
-
-        biggestDescription += 7 + subMenus.size();
-
-        System.out.print("=".repeat((biggestDescription - titleSize)/2) + " ");
+    
+        biggestDescription += 7 + numberChildren();
+    
+        System.out.print("=".repeat(Math.max(0, (biggestDescription - titleSize) / 2)) + " ");
         System.out.print(title);
-        System.out.println(" " + "=".repeat((biggestDescription - titleSize)/2));
-
-        for(int i = 0; i < subMenus.size(); i++){
+        System.out.println(" " + "=".repeat(Math.max(0, (biggestDescription - titleSize) / 2)));
+    
+        for(int i = 0; i < numberChildren(); i++){
             String line = new String();
             line += "| " + (i + 1) + " - ";
             line += subMenus.get(i).description;
-            line += " ".repeat(biggestDescription - line.length() - 2) + " |";
+            line += " ".repeat(Math.max(0, biggestDescription - line.length() - 2)) + " |";
             System.out.println(line);
         }
-
-        System.out.println("| 0 - return");
-        System.out.println("=".repeat(biggestDescription));
+    
+        System.out.print("| 0 - ");
+        if(parent == null){
+            System.out.println("exit");
+        }
+        else{
+            System.out.println("return");
+        }
+    
+        System.out.println("=".repeat(Math.max(0, biggestDescription)));
     }
+    
 }

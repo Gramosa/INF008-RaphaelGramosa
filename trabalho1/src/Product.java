@@ -10,17 +10,21 @@ public class Product implements Serializable {
     private int stock;
     private double price;
 
-    public Product(String name, String category, String description, double price){
+    public Product(String name, String category, String description, double price, int stock){
         this.name = name;
         this.category = category;
         this.description = description;
         this.price = price;
+        this.stock = stock;
         this.id = productCount++;
     }
 
-    public Product(String name, String category, String description, double price, int initialStock) {
-        this(name, category, description, price);
-        this.stock = initialStock;
+    public static int getProductCount(){
+        return productCount;
+    }
+
+    public static void setProductCount(int value){
+        productCount = value;
     }
 
     public double getPrice(){
@@ -46,5 +50,17 @@ public class Product implements Serializable {
 
         this.stock += ammount;
         return true;
+    }
+
+    public String toText(){
+        return String.format(
+            "ID: %d\nName: %s\nCategory: %s\nDescription: %s\nPrice: R$ %.2f\nStock: %d",
+            id, 
+            name, 
+            category, 
+            description, 
+            price, 
+            stock
+        );
     }
 }
