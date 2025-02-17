@@ -1,0 +1,14 @@
+# Maven target directory
+target/
+
+# Eclipse project files
+.project
+.classpath
+.settings/
+
+# Arquivos temporários do sistema operacional
+.DS_Store   # MacOS
+Thumbs.db   # Windows
+
+# Arquivos de logs
+*.log
