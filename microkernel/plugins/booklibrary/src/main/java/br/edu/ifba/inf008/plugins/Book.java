@@ -1,3 +1,5 @@
+package br.edu.ifba.inf008.plugins;
+
 public class Book {
     private String isbn;
     private String title;
@@ -11,5 +13,13 @@ public class Book {
         this.author = author;
         this.pubDate = pubDate;
         this.genre = genre;
+    }
+
+    @Override
+    public String toString(){
+        return String.format(
+            "ISBN: %s, Title: %s, Author: %s, PubDate: %s, Genre: %s",
+            isbn, title, author, pubDate, genre
+            );
     }
 }
