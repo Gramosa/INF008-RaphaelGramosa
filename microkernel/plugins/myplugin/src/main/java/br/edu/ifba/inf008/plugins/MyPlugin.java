@@ -14,7 +14,6 @@ public class MyPlugin implements IPlugin
 {
     public boolean init() {
         IUIController uiController = ICore.getInstance().getUIController();
-
         MenuItem menuItem = uiController.createMenuItem("Menu 1", "My Menu Item");
         menuItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -23,7 +22,7 @@ public class MyPlugin implements IPlugin
             }
         });
 
-        uiController.createTab("new tab", new Rectangle(200,200, Color.LIGHTSTEELBLUE));
+        uiController.createTabOnRight("new tab", new Rectangle(200,200, Color.LIGHTSTEELBLUE));
 
         return true;
     }

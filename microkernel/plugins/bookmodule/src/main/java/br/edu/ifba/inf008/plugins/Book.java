@@ -18,8 +18,16 @@ public class Book {
     @Override
     public String toString(){
         return String.format(
-            "ISBN: %s, Title: %s, Author: %s, PubDate: %s, Genre: %s",
+            "ISBN: %s. Title: %s. Author: %s. PubDate: %s. Genre: %s.",
             isbn, title, author, pubDate, genre
             );
+    }
+
+    public String getIsbn(){
+        return isbn;
+    }
+
+    public String getTitle(){
+        return title;
     }
 }

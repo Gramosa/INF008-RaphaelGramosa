@@ -2,7 +2,9 @@ package br.edu.ifba.inf008.shell;
 
 import br.edu.ifba.inf008.App;
 import br.edu.ifba.inf008.interfaces.IPluginController;
+import br.edu.ifba.inf008.interfaces.IEventData;
 import br.edu.ifba.inf008.interfaces.IPlugin;
+import br.edu.ifba.inf008.interfaces.IPluginListener;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -11,11 +13,10 @@ import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Consumer;
 
 public class PluginController implements IPluginController
 {
-    private final HashMap<String, Set<Consumer<Object>>> listeners = new HashMap<>();
+    private final HashMap<String, Set<IPluginListener>> listeners = new HashMap<>();
 
     public boolean init() {
         try {
@@ -52,18 +53,22 @@ public class PluginController implements IPluginController
         }
     }
 
-    public void subscribe(String event, Consumer<Object> listener){
+    public void subscribe(String event, IPluginListener plugin) {
         if(!listeners.containsKey(event)){
             listeners.put(event, new HashSet<>());
         }
-        listeners.get(event).add(listener);
+        listeners.get(event).add(plugin);
     }
 
-    public void emit(String event, Object data){
-        if(listeners.containsKey(event)){
-            for(Consumer<Object> listener : listeners.get(event)){
-                listener.accept(data);
-            }
+    public boolean emit(String event, IEventData data){
+        Set<IPluginListener> eventListeners = listeners.get(event);
+        if(eventListeners == null || eventListeners.isEmpty()){
+            return false;
         }
+        
+        for(IPluginListener pluginCommunicator : eventListeners){
+            pluginCommunicator.onEvent(data);
+        }
+        return true;
     }
 }

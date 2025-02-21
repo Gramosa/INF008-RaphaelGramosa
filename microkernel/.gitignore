@@ -5,6 +5,8 @@ target/
 .project
 .classpath
 .settings/
+.idea/
+.vscode/
 
 # Arquivos temporários do sistema operacional
 .DS_Store   # MacOS
@@ -12,3 +14,6 @@ Thumbs.db   # Windows
 
 # Arquivos de logs
 *.log
+
+#Arquivos java
+*.jar
