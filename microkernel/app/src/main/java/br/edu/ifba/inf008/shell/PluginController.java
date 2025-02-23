@@ -11,12 +11,10 @@ import java.io.FilenameFilter;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 public class PluginController implements IPluginController
 {
-    private final HashMap<String, Set<IPluginListener>> listeners = new HashMap<>();
+    private final HashMap<String, IPluginListener> listeners = new HashMap<>(); //event, listeners
 
     public boolean init() {
         try {
@@ -53,22 +51,20 @@ public class PluginController implements IPluginController
         }
     }
 
+    @Override
     public void subscribe(String event, IPluginListener plugin) {
-        if(!listeners.containsKey(event)){
-            listeners.put(event, new HashSet<>());
-        }
-        listeners.get(event).add(plugin);
+        listeners.put(event, plugin);
     }
 
-    public boolean emit(String event, IEventData data){
-        Set<IPluginListener> eventListeners = listeners.get(event);
-        if(eventListeners == null || eventListeners.isEmpty()){
-            return false;
+    @Override
+    public <T, R> R emit(IEventData<T> data){
+        String eventName = data.getEventName();
+
+        IPluginListener listener = listeners.get(eventName);
+        if(listener == null){
+            return null;
         }
-        
-        for(IPluginListener pluginCommunicator : eventListeners){
-            pluginCommunicator.onEvent(data);
-        }
-        return true;
+
+        return listener.onEvent(data);
     }
 }

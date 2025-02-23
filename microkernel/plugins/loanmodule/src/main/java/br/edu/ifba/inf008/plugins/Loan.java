@@ -20,4 +20,8 @@ public class Loan {
             bookIsbn, userId, date
             );
     }
+
+    public String getBookIsbn(){
+        return bookIsbn;
+    }
 }

@@ -4,5 +4,5 @@ public interface IPluginController
 {
     public abstract boolean init();
     public abstract void subscribe(String event, IPluginListener plugin);
-    public abstract boolean emit(String event, IEventData data); //Vai ser falso se ninguem ouvir a emissão
+    public <T, R> R emit(IEventData<T> data); //vai ser null se ninguem estiver ouvindo
 }

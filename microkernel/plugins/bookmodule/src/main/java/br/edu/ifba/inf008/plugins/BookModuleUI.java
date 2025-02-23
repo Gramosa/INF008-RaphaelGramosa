@@ -39,15 +39,25 @@ public class BookModuleUI {
         // Botão para adicionar um livro
         Button addButton = new Button("Add book");
         addButton.setOnAction(e -> {
-            Book newBook = new Book(
-                isbnField.getText(),
-                titleField.getText(),
-                authorField.getText(),
-                pubDateField.getText(),
-                genreField.getText()
-            );
+            String isbn = isbnField.getText();
+            String title = titleField.getText();
+            String author = authorField.getText();
+            String pubDate = pubDateField.getText();
+            String genre = genreField.getText();
 
-            if (bookModule.addBook(newBook)) {
+            if (isbn == null || isbn.isEmpty() ||
+                title == null || title.isEmpty() ||
+                author == null || author.isEmpty() ||
+                pubDate == null || pubDate.isEmpty() ||
+                genre == null || genre.isEmpty()) {
+                
+                    uiController.showPopup("Please fill in all fields!");
+                    return;
+            }
+
+            Book book = new Book(isbn, title, author, pubDate, genre);
+
+            if (bookModule.addBook(book)) {
                 uiController.showPopup(String.format("Book \"%s\" added with success!", titleField.getText()));
             } else {
                 uiController.showPopup("ISBN already exists!");

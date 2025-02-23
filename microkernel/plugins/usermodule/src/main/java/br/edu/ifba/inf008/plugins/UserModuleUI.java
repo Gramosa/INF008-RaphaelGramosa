@@ -74,9 +74,6 @@ public class UserModuleUI{
     }
 
     public void buildListUsersTab() {
-        ICore core = ICore.getInstance();
-        IUIController uiController = core.getUIController();
-
         // Botão para listar os livros
         Button listButton = new Button("List Users");
         listButton.setOnAction(e -> {

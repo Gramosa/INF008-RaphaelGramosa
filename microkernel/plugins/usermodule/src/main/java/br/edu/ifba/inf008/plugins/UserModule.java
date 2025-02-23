@@ -1,6 +1,5 @@
 package br.edu.ifba.inf008.plugins;
 
-import br.edu.ifba.inf008.events.UserRequestEvent;
 import br.edu.ifba.inf008.interfaces.IPlugin;
 import br.edu.ifba.inf008.interfaces.IPluginController;
 import br.edu.ifba.inf008.interfaces.IPluginListener;
@@ -19,6 +18,30 @@ public class UserModule implements IPlugin, IPluginListener {
 
     private HashMap<Integer, User> users = new HashMap<>(); // id, user
     private UserModuleUI userModuleUI;
+
+    private IPluginController pluginController;
+
+    public boolean init() {
+        userModuleUI = new UserModuleUI(this);
+        
+        ICore core = ICore.getInstance();
+        IUIController uiController = core.getUIController();
+        pluginController = core.getPluginController();
+
+        String menuText = "User Module";
+        MenuItem newUserMenuItem = uiController.createMenuItem(menuText, "Createn a new user");
+        newUserMenuItem.setOnAction(e -> userModuleUI.buildCreateUserTab());
+
+        MenuItem searchUserMenuItem = uiController.createMenuItem(menuText, "Search an user");
+        searchUserMenuItem.setOnAction(e -> userModuleUI.buildSearchUserTab());
+
+        MenuItem listUserMenuItem = uiController.createMenuItem(menuText, "List all users");
+        listUserMenuItem.setOnAction(e -> userModuleUI.buildListUsersTab());
+
+        pluginController.subscribe("check_user", this);
+
+        return true;
+    }
 
     public boolean addUser(String name){
         if(name == null || name.equals("")){
@@ -61,36 +84,23 @@ public class UserModule implements IPlugin, IPluginListener {
         return matchingUsers; // Retorna a lista com os usuários encontrados
     }
 
-    public boolean init() {
-        userModuleUI = new UserModuleUI(this);
-        
-        ICore core = ICore.getInstance();
-        IUIController uiController = core.getUIController();
-        IPluginController pluginController = core.getPluginController();
-
-        String menuText = "User Module";
-        MenuItem newUserMenuItem = uiController.createMenuItem(menuText, "Createn a new user");
-        newUserMenuItem.setOnAction(e -> userModuleUI.buildCreateUserTab());
-
-        MenuItem searchUserMenuItem = uiController.createMenuItem(menuText, "Search an user");
-        searchUserMenuItem.setOnAction(e -> userModuleUI.buildSearchUserTab());
-
-        MenuItem listUserMenuItem = uiController.createMenuItem(menuText, "List all users");
-        listUserMenuItem.setOnAction(e -> userModuleUI.buildListUsersTab());
-
-        pluginController.subscribe("request_user", this);
-
-        return true;
-    }
-
-    public void onEvent(IEventData event){
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T, R> R onEvent(IEventData<T> event){
         String eventName = event.getEventName();
-        if(eventName.equals("request_user")){
-            UserRequestEvent userRequestEvent = (UserRequestEvent) event;
-            User user = getUser(userRequestEvent.getUserId());
+
+        if(eventName.equals("check_user")){
+            Integer userId = (Integer) event.getData();
+            User user = getUser(userId);
+            
             if(user == null){
-                // Continuar
+                return (R) Boolean.FALSE;
             }
+
+            return (R) Boolean.TRUE;
+        }
+        else{
+            return null;
         }
     }
 }

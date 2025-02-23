@@ -1,7 +1,5 @@
 package br.edu.ifba.inf008.plugins;
 
-import br.edu.ifba.inf008.events.BookBorrowEvent;
-
 import br.edu.ifba.inf008.interfaces.IPlugin;
 import br.edu.ifba.inf008.interfaces.IPluginController;
 import br.edu.ifba.inf008.interfaces.IPluginListener;
@@ -36,15 +34,27 @@ public class BookModule implements IPlugin, IPluginListener {
         MenuItem listBooksMenuItem = uiController.createMenuItem(menuText, "List all books");
         listBooksMenuItem.setOnAction(e -> bookModuleUI.buildListBooksTab());
 
-        pluginController.subscribe("borrow_book", this);
+        pluginController.subscribe("check_book", this);
 
         return true;
     }
 
-    public void onEvent(IEventData event){
-        if(event.getEventName() == "borrow_book"){
-            BookBorrowEvent bookBorrowEvent = (BookBorrowEvent) event;
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T, R> R onEvent(IEventData<T> event){
+        String eventName = event.getEventName();
+        if(eventName.equals("check_book")){
+            String isbn = (String) event.getData();
+            Book book = getBook(isbn);
+
+            if(book == null){
+                return (R) Boolean.FALSE;
+            }
+
+            return (R) Boolean.TRUE;
         }
+
+        return null;
     }
 
     public boolean addBook(Book book) {
