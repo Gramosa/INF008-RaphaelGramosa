@@ -1,5 +1,7 @@
 package br.edu.ifba.inf008.plugins;
 
+import java.util.ArrayList;
+
 public class Book {
     private String isbn;
     private String title;
@@ -29,5 +31,16 @@ public class Book {
 
     public String getTitle(){
         return title;
+    }
+
+    public ArrayList<String> toArrayList(){
+        ArrayList<String> array = new ArrayList<>();
+        array.add(isbn);
+        array.add(title);
+        array.add(author);
+        array.add(pubDate);
+        array.add(genre);
+
+        return array;
     }
 }

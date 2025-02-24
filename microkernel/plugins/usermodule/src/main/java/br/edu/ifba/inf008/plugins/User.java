@@ -1,5 +1,7 @@
 package br.edu.ifba.inf008.plugins;
 
+import java.util.ArrayList;
+
 public class User {
     private int id;
     private String name;
@@ -23,5 +25,12 @@ public class User {
 
     public String getName(){
         return name;
+    }
+
+    public ArrayList<String> toArrayList(){
+        ArrayList<String> array = new ArrayList<>();
+        array.add(Integer.toString(id));
+        array.add(name);
+        return array;
     }
 }

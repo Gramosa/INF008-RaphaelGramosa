@@ -80,6 +80,7 @@ public class UserModuleUI{
             for (User user : userModule.getAllUsers()) {
                 uiController.createTabOnLeft("List Users Query", user.toString());
             }
+            uiController.showPopup(String.format("%d users found!",userModule.getAllUsers().size()));
         });
 
         // Layout da aba

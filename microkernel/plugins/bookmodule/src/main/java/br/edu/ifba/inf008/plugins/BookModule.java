@@ -34,27 +34,9 @@ public class BookModule implements IPlugin, IPluginListener {
         MenuItem listBooksMenuItem = uiController.createMenuItem(menuText, "List all books");
         listBooksMenuItem.setOnAction(e -> bookModuleUI.buildListBooksTab());
 
-        pluginController.subscribe("check_book", this);
-
+        pluginController.subscribe("get_book", this);
+        pluginController.subscribe("get_book_string", this);
         return true;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T, R> R onEvent(IEventData<T> event){
-        String eventName = event.getEventName();
-        if(eventName.equals("check_book")){
-            String isbn = (String) event.getData();
-            Book book = getBook(isbn);
-
-            if(book == null){
-                return (R) Boolean.FALSE;
-            }
-
-            return (R) Boolean.TRUE;
-        }
-
-        return null;
     }
 
     public boolean addBook(Book book) {
@@ -94,5 +76,40 @@ public class BookModule implements IPlugin, IPluginListener {
 
     public ArrayList<Book> getAllBooks() {
         return new ArrayList<>(books.values());
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T, R> R onEvent(IEventData<T> event){
+        String eventName = event.getEventName();
+        if(eventName.equals("get_book")){
+            String isbn = (String) event.getData();
+            return (R) getBookResponse(isbn);
+        }
+        else if(eventName.equals("get_book_string")){
+            String isbn = (String) event.getData();
+            return (R) getBookResponseString(isbn);
+        }
+        else{
+            return null;
+        }
+    }
+
+    private ArrayList<String> getBookResponse(String bookIsbn){
+        Book book = getBook(bookIsbn);
+        if(book == null){
+            return new ArrayList<>();
+        }
+
+        return book.toArrayList();
+    }
+
+    private String getBookResponseString(String bookIsbn){
+        Book book = getBook(bookIsbn);
+        if(book == null){
+            return "";
+        }
+
+        return book.toString();
     }
 }

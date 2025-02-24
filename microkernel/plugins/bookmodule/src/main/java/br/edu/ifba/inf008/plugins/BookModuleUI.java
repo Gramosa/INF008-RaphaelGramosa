@@ -113,6 +113,7 @@ public class BookModuleUI {
             for (Book book : bookModule.getAllBooks()) {
                 uiController.createTabOnLeft("List Books Query", book.toString());
             }
+            uiController.showPopup(String.format("%d books found!",bookModule.getAllBooks().size()));
         });
 
         // Layout da aba

@@ -38,8 +38,8 @@ public class UserModule implements IPlugin, IPluginListener {
         MenuItem listUserMenuItem = uiController.createMenuItem(menuText, "List all users");
         listUserMenuItem.setOnAction(e -> userModuleUI.buildListUsersTab());
 
-        pluginController.subscribe("check_user", this);
-
+        pluginController.subscribe("get_user", this);
+        pluginController.subscribe("get_user_string", this);
         return true;
     }
 
@@ -63,18 +63,16 @@ public class UserModule implements IPlugin, IPluginListener {
 
     public ArrayList<User> getUsersByName(String name, boolean anyMatch) {
         ArrayList<User> matchingUsers = new ArrayList<>();
-    
-        for (User user : users.values()) { // Percorre todos os usuários no HashMap
-            String userName = user.getName().toLowerCase(); // Nome do usuário em minúsculas
-            String searchName = name.toLowerCase(); // Texto da pesquisa em minúsculas
+        String searchName = name.toLowerCase();
+
+        for (User user : users.values()) {
+            String userName = user.getName().toLowerCase();
     
             if (anyMatch) {
-                // Se o nome contém a string de busca
                 if (userName.contains(searchName)) {
                     matchingUsers.add(user);
                 }
             } else {
-                // Se o nome for exatamente igual à string de busca
                 if (userName.equals(searchName)) {
                     matchingUsers.add(user);
                 }
@@ -88,19 +86,34 @@ public class UserModule implements IPlugin, IPluginListener {
     @SuppressWarnings("unchecked")
     public <T, R> R onEvent(IEventData<T> event){
         String eventName = event.getEventName();
-
-        if(eventName.equals("check_user")){
+        if(eventName.equals("get_user")){
             Integer userId = (Integer) event.getData();
-            User user = getUser(userId);
-            
-            if(user == null){
-                return (R) Boolean.FALSE;
-            }
-
-            return (R) Boolean.TRUE;
+            return (R) getUserResponse(userId);
+        }
+        else if(eventName.equals("get_user_string")){
+            Integer userId = (Integer) event.getData();
+            return (R) getUserResponseString(userId);
         }
         else{
             return null;
         }
+    }
+
+    private ArrayList<String> getUserResponse(Integer userId){
+        User user = getUser(userId);
+        if(user == null){
+            return new ArrayList<>();
+        }
+
+        return user.toArrayList();
+    }
+
+    private String getUserResponseString(Integer userId){
+        User user = getUser(userId);
+        if(user == null){
+            return "";
+        }
+
+        return user.toString();
     }
 }

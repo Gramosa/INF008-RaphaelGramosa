@@ -21,6 +21,10 @@ public class Loan {
             );
     }
 
+    public Integer getUserId(){
+        return userId;
+    }
+
     public String getBookIsbn(){
         return bookIsbn;
     }

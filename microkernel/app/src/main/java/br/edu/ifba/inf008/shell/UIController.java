@@ -87,8 +87,8 @@ public class UIController extends Application implements IUIController {
 
     private TabPane buildLeftTabPane() {
         TabPane leftTabPane = new TabPane();
-        leftTabPane.setSide(Side.LEFT);
-        leftTabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        leftTabPane.setSide(Side.TOP);
+        //leftTabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         return leftTabPane;
     }
 
@@ -126,7 +126,7 @@ public class UIController extends Application implements IUIController {
     private BorderPane buildRightPanel() {
         BorderPane rightPanel = new BorderPane();
         rightPanel.setTop(rightTabPane);
-        rightPanel.setCenter(new Label("Painel Direito"));
+        //rightPanel.setCenter(new Label("Painel Direito"));
         return rightPanel;
     }
 
@@ -167,11 +167,12 @@ public class UIController extends Application implements IUIController {
         ScrollPane sp = (ScrollPane) targetTab.getContent();
         VBox contentBox = (VBox) sp.getContent();
 
-        // Verifica se o item já foi adicionado, comparando diretamente os textos dos Labels
-        for (Node node : contentBox.getChildren()) {
-            Label label = (Label) node;
-            if (label.getText().equals(resultText)) {
-                return false; // Se já existir, não adiciona
+        // Verifica se o item adicionado é igual ao ultimo item, se for não adiciona
+        // Evita que o usuario faça um spam no botão
+        if (!contentBox.getChildren().isEmpty()){
+            Label lastLabel = (Label) contentBox.getChildren().get(contentBox.getChildren().size() - 1);
+            if(lastLabel.getText().equals(resultText)){
+                return false;
             }
         }
 
