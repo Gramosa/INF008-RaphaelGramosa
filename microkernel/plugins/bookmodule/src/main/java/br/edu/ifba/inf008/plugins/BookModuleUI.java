@@ -1,5 +1,6 @@
 package br.edu.ifba.inf008.plugins;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 import br.edu.ifba.inf008.interfaces.ICore;
@@ -7,6 +8,8 @@ import br.edu.ifba.inf008.interfaces.IUIController;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
@@ -30,8 +33,8 @@ public class BookModuleUI {
         TextField authorField = new TextField();
         authorField.setPromptText("Author");
 
-        TextField pubDateField = new TextField();
-        pubDateField.setPromptText("Publication date");
+        DatePicker pubDatePicker = new DatePicker();
+        pubDatePicker.setPromptText("Publication date");
 
         TextField genreField = new TextField();
         genreField.setPromptText("genre");
@@ -42,17 +45,21 @@ public class BookModuleUI {
             String isbn = isbnField.getText();
             String title = titleField.getText();
             String author = authorField.getText();
-            String pubDate = pubDateField.getText();
+            LocalDate pubDate = pubDatePicker.getValue();
             String genre = genreField.getText();
 
-            if (isbn == null || isbn.isEmpty() ||
-                title == null || title.isEmpty() ||
-                author == null || author.isEmpty() ||
-                pubDate == null || pubDate.isEmpty() ||
-                genre == null || genre.isEmpty()) {
-                
-                    uiController.showPopup("Please fill in all fields!");
+            if (isbn == null || isbn.isBlank() ||
+                title == null || title.isBlank() ||
+                author == null || author.isBlank() ||
+                pubDate == null ||
+                genre == null || genre.isBlank()) {
+                    uiController.showPopup("Please all fields must have valid values!");
                     return;
+            }
+
+            if(!pubDate.isBefore(LocalDate.now())){
+                uiController.showPopup("Book cannot be created in the future");
+                return;
             }
 
             Book book = new Book(isbn, title, author, pubDate, genre);
@@ -65,7 +72,7 @@ public class BookModuleUI {
         });
 
         // Layout da aba
-        VBox layout = new VBox(10, isbnField, titleField, authorField, pubDateField, genreField, addButton);
+        VBox layout = new VBox(10, isbnField, titleField, authorField, pubDatePicker, genreField, addButton);
         layout.setPadding(new Insets(10));
         layout.setAlignment(Pos.CENTER);
 
@@ -86,7 +93,7 @@ public class BookModuleUI {
             ArrayList<Book> matchingBooks = bookModule.getBooksByTitle(title, true);
             if (!matchingBooks.isEmpty()) {
                 for(Book book : matchingBooks){
-                    uiController.createTabOnLeft("Search Book Query", book.toString());
+                    uiController.createTabOnLeft("Books Query", book.toString());
                 }
                 uiController.showPopup("Search match!");
             } else {
@@ -104,20 +111,22 @@ public class BookModuleUI {
     }
 
     public void buildListBooksTab() {
-        ICore core = ICore.getInstance();
-        IUIController uiController = core.getUIController();
-
         // Botão para listar os livros
+        CheckBox availibleBooksCheck = new CheckBox("Only not borrowed books");
         Button listButton = new Button("List Books");
+        
         listButton.setOnAction(e -> {
-            for (Book book : bookModule.getAllBooks()) {
-                uiController.createTabOnLeft("List Books Query", book.toString());
+            boolean active = availibleBooksCheck.isSelected();
+            ArrayList<Book> availibleBooks = bookModule.getAllBooks(active);
+            
+            for (Book book : availibleBooks) {
+                uiController.createTabOnLeft("Books Query", book.toString());
             }
-            uiController.showPopup(String.format("%d books found!",bookModule.getAllBooks().size()));
+            uiController.showPopup(String.format("%d books found!", availibleBooks.size()));
         });
 
         // Layout da aba
-        VBox layout = new VBox(10, listButton);
+        VBox layout = new VBox(10, availibleBooksCheck, listButton);
         layout.setPadding(new Insets(10));
         layout.setAlignment(Pos.CENTER);
 

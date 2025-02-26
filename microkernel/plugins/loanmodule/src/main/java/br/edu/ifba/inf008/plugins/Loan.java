@@ -1,23 +1,25 @@
 package br.edu.ifba.inf008.plugins;
 
-import java.time.LocalDateTime;
+import java.io.Serializable;
+import java.time.LocalDate;
 
-public class Loan {
+public class Loan implements Serializable{
     private String bookIsbn;
     private Integer userId;
-    private LocalDateTime date;
+    private LocalDate borrowDate;
+    private LocalDate returnDate;
 
-    public Loan(String bookIsbn, Integer userId){
+    public Loan(String bookIsbn, Integer userId, LocalDate borrowDate){
         this.bookIsbn = bookIsbn;
         this.userId = userId;
-        this.date = LocalDateTime.now();
+        this.borrowDate = borrowDate;
     }
 
     @Override
     public String toString(){
         return String.format(
             "ISBN: %s. Title: %d. Loan date: %s.",
-            bookIsbn, userId, date
+            bookIsbn, userId, borrowDate
             );
     }
 
@@ -27,5 +29,17 @@ public class Loan {
 
     public String getBookIsbn(){
         return bookIsbn;
+    }
+
+    public LocalDate getReturnDate(){
+        return returnDate;
+    }
+
+    public LocalDate getLoanDate(){
+        return borrowDate;
+    }
+
+    public void finishLoan(){
+        returnDate = LocalDate.now();
     }
 }

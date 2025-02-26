@@ -1,27 +1,37 @@
 package br.edu.ifba.inf008.plugins;
 
+import br.edu.ifba.inf008.events.EventData;
+
 import br.edu.ifba.inf008.interfaces.IPlugin;
 import br.edu.ifba.inf008.interfaces.IPluginController;
 import br.edu.ifba.inf008.interfaces.IPluginListener;
+import br.edu.ifba.inf008.interfaces.IPluginSerialization;
 import br.edu.ifba.inf008.interfaces.ICore;
 import br.edu.ifba.inf008.interfaces.IEventData;
 import br.edu.ifba.inf008.interfaces.IUIController;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import javafx.scene.control.MenuItem;
 
-public class BookModule implements IPlugin, IPluginListener {
+public class BookModule implements IPlugin, IPluginListener, IPluginSerialization{
+    private static final String fileName = "BookModule.dat";
+
     private HashMap<String, Book> books = new HashMap<>();
+    
+    private IPluginController pluginController;
+    private IUIController uiController;
     private BookModuleUI bookModuleUI;
 
     public boolean init() {
         bookModuleUI = new BookModuleUI(this);
 
         ICore core = ICore.getInstance();
-        IUIController uiController = core.getUIController();
-        IPluginController pluginController = core.getPluginController();
+        uiController = core.getUIController();
+        pluginController = core.getPluginController();
 
         // Criar item de menu para abrir a aba "Book Library"
         String menuText = "Book Module";
@@ -37,6 +47,25 @@ public class BookModule implements IPlugin, IPluginListener {
         pluginController.subscribe("get_book", this);
         pluginController.subscribe("get_book_string", this);
         return true;
+    }
+
+    @Override
+    public void saveData(){
+        HashMap<String, Serializable> pluginData = new HashMap<>();
+
+        pluginData.put("books", books);
+
+        save(pluginData, fileName);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void loadData() {
+        HashMap<String, Serializable> pluginData = load(fileName);
+        if(pluginData.isEmpty()){
+            return;
+        }
+        books = (HashMap<String, Book>) pluginData.get("books");
     }
 
     public boolean addBook(Book book) {
@@ -74,8 +103,28 @@ public class BookModule implements IPlugin, IPluginListener {
         return matchingBooks;
     }
 
-    public ArrayList<Book> getAllBooks() {
-        return new ArrayList<>(books.values());
+    public ArrayList<Book> getAllBooks(boolean onlyAvailible) {
+        if(!onlyAvailible){
+            return new ArrayList<>(books.values());
+        }
+        ArrayList<Book> availibleBooks = new ArrayList<>();
+
+        ArrayList<String> loanedIsbns = pluginController.emit(new EventData<>("get_loaned_isbns"));
+        if(loanedIsbns == null){
+            uiController.showPopup("No response from LoanModule");
+            return availibleBooks;
+        }
+
+        HashSet<String> loanedIsbnsSet = new HashSet<>(loanedIsbns);
+
+        // Iterar sobre todos os livros e adicionar os não emprestados
+        for (String isbn : books.keySet()){
+            if(!loanedIsbnsSet.contains(isbn)){
+                availibleBooks.add(books.get(isbn));
+            }
+        }
+
+        return availibleBooks;
     }
 
     @Override
@@ -88,7 +137,7 @@ public class BookModule implements IPlugin, IPluginListener {
         }
         else if(eventName.equals("get_book_string")){
             String isbn = (String) event.getData();
-            return (R) getBookResponseString(isbn);
+            return (R) getBookStringResponse(isbn);
         }
         else{
             return null;
@@ -104,7 +153,7 @@ public class BookModule implements IPlugin, IPluginListener {
         return book.toArrayList();
     }
 
-    private String getBookResponseString(String bookIsbn){
+    private String getBookStringResponse(String bookIsbn){
         Book book = getBook(bookIsbn);
         if(book == null){
             return "";

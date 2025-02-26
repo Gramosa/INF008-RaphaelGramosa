@@ -57,7 +57,7 @@ public class UserModuleUI{
             ArrayList<User> matchingUsers = userModule.getUsersByName(name, true);
             if (!matchingUsers.isEmpty()) {
                 for(User book : matchingUsers){
-                    uiController.createTabOnLeft("Search User Query", book.toString());
+                    uiController.createTabOnLeft("User Query", book.toString());
                 }
                 uiController.showPopup("Search match!");
             } else {
@@ -78,7 +78,7 @@ public class UserModuleUI{
         Button listButton = new Button("List Users");
         listButton.setOnAction(e -> {
             for (User user : userModule.getAllUsers()) {
-                uiController.createTabOnLeft("List Users Query", user.toString());
+                uiController.createTabOnLeft("Users Query", user.toString());
             }
             uiController.showPopup(String.format("%d users found!",userModule.getAllUsers().size()));
         });

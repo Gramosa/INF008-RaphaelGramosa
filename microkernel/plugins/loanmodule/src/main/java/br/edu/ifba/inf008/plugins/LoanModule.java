@@ -4,17 +4,23 @@ import br.edu.ifba.inf008.events.EventData;
 
 import br.edu.ifba.inf008.interfaces.IPlugin;
 import br.edu.ifba.inf008.interfaces.IPluginController;
+import br.edu.ifba.inf008.interfaces.IPluginListener;
+import br.edu.ifba.inf008.interfaces.IPluginSerialization;
 import br.edu.ifba.inf008.interfaces.ICore;
 import br.edu.ifba.inf008.interfaces.IEventData;
 import br.edu.ifba.inf008.interfaces.IUIController;
 
+import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import javafx.scene.control.MenuItem;
 
-public class LoanModule implements IPlugin {
+public class LoanModule implements IPlugin, IPluginListener, IPluginSerialization{
+    private static final String fileName = "LoanModule.dat";
+
     private HashMap<Integer, ArrayList<Loan>> loans = new HashMap<>(); //userId, loans
     private HashMap<Integer, ArrayList<Loan>> archivedLoans = new HashMap<>();
     private LoanModuleUI loanModuleUI;
@@ -45,12 +51,40 @@ public class LoanModule implements IPlugin {
         MenuItem userTransactionsMenuItem = uiController.createMenuItem(menuText, "Check user transactions");
         userTransactionsMenuItem.setOnAction(e -> loanModuleUI.buildUserLoansTransaction());
         
+        pluginController.subscribe("get_loaned_isbns", this);
+
         return true;
     }
 
-    public boolean addLoan(Integer userId, String bookIsbn) {
+    @Override
+    public void saveData(){
+        HashMap<String, Serializable> pluginData = new HashMap<>();
+
+        pluginData.put("loans", loans);
+        pluginData.put("archivedLoans", archivedLoans);
+
+        save(pluginData, fileName);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void loadData() {
+        HashMap<String, Serializable> pluginData = load(fileName);
+        if(pluginData.isEmpty()){
+            return;
+        }
+        loans = (HashMap<Integer, ArrayList<Loan>>) pluginData.get("loans");
+        archivedLoans = (HashMap<Integer, ArrayList<Loan>>) pluginData.get("archivedLoans");
+    }
+
+    public boolean addLoan(Integer userId, String bookIsbn, LocalDate borrowDate) {
         if(getLoanFromIsbn(loans, bookIsbn) != null){
             uiController.showPopup("Book were already borrowed!");
+            return false;
+        }
+
+        if(!borrowDate.isBefore(LocalDate.now())){
+            uiController.showPopup("A book cannot be borrowed in the future!");
             return false;
         }
         
@@ -71,7 +105,7 @@ public class LoanModule implements IPlugin {
             return false;
         }
 
-        loans.get(userId).add(new Loan(bookIsbn, userId));
+        loans.get(userId).add(new Loan(bookIsbn, userId, borrowDate));
         return true;
     }
 
@@ -87,18 +121,20 @@ public class LoanModule implements IPlugin {
             archivedLoans.put(userId, new ArrayList<>());
         }
 
-        archivedLoans.get(userId).add(new Loan(bookIsbn, userId));
+        archivedLoans.get(userId).add(loan);
+        loan.finishLoan();
 
         // Remover o empréstimo da lista de loans associada ao userId
         ArrayList<Loan> userLoans = loans.get(userId);
         if (userLoans != null) {
-            userLoans.removeIf(loanItem -> loanItem.getBookIsbn().equals(bookIsbn));
+            userLoans.remove(loan);
 
             // Se não houver mais empréstimos para o usuário, remove o hashmap inteiro
             if (userLoans.isEmpty()) {
                 loans.remove(userId);
             }
         }
+
         return true;
     }
 
@@ -148,6 +184,30 @@ public class LoanModule implements IPlugin {
             }
         }
         return null;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T, R> R onEvent(IEventData<T> event){
+        if(event.getEventName().equals("get_loaned_isbns")){
+            return (R) getLoanedIsbnsResponse();
+        }
+        else{
+            return null;
+        }
+    }
+
+    // Somente os empretismos ativos no momento
+    private ArrayList<String> getLoanedIsbnsResponse(){
+        ArrayList<String> array = new ArrayList<>();
+
+        for(ArrayList<Loan> userLoans : loans.values()){
+            for(Loan loan : userLoans){
+                array.add(loan.getBookIsbn());
+            }
+        }
+
+        return array;
     }
 
     private <T> Boolean checkEntityExistence(IEventData<T> eventData, String identifier, String entityName) {
@@ -201,7 +261,13 @@ public class LoanModule implements IPlugin {
         }
 
         for(Loan loan : userLoans){
-            array.add(solveBook(loan.getBookIsbn()));
+            String bookInfo = solveBook(loan.getBookIsbn());
+            bookInfo += String.format("\t\nLoan date: %s", loan.getLoanDate().toString());
+            if(loan.getReturnDate() != null){
+                bookInfo += String.format("\t\nReturn date: %s", loan.getReturnDate().toString());
+            }
+            
+            array.add(bookInfo);
         }
 
         return array;

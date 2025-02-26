@@ -5,15 +5,18 @@ import br.edu.ifba.inf008.interfaces.IPluginController;
 import br.edu.ifba.inf008.interfaces.IEventData;
 import br.edu.ifba.inf008.interfaces.IPlugin;
 import br.edu.ifba.inf008.interfaces.IPluginListener;
+import br.edu.ifba.inf008.interfaces.IPluginSerialization;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class PluginController implements IPluginController
 {
+    private final ArrayList<IPluginSerialization> serializablePlugins = new ArrayList<>();
     private final HashMap<String, IPluginListener> listeners = new HashMap<>(); //event, listeners
 
     public boolean init() {
@@ -41,6 +44,13 @@ public class PluginController implements IPluginController
                 String pluginName = plugins[i].split("\\.")[0];
                 IPlugin plugin = (IPlugin) Class.forName("br.edu.ifba.inf008.plugins." + pluginName, true, ulc).newInstance();
                 plugin.init();
+
+                System.out.println(pluginName);
+
+                if (plugin instanceof IPluginSerialization) {
+                    IPluginSerialization serializablePlugin = (IPluginSerialization) plugin;
+                    serializablePlugins.add(serializablePlugin);
+                }
             }
 
             return true;
@@ -66,5 +76,17 @@ public class PluginController implements IPluginController
         }
 
         return listener.onEvent(data);
+    }
+
+    public void loadAllPlugins(){
+        for(IPluginSerialization plugin : serializablePlugins){
+            plugin.loadData();
+        }
+    }
+
+    public void saveAllPlugins(){
+        for(IPluginSerialization plugin : serializablePlugins){
+            plugin.saveData();
+        }
     }
 }

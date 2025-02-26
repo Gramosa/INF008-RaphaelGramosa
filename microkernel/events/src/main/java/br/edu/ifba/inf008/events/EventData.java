@@ -6,10 +6,13 @@ public class EventData<T> implements IEventData<T>{
     private final String event;
     private final T data;
 
-    //Meio que não é obrigatorio definir um callback
     public EventData(String event, T data){
         this.event = event;
         this.data = data;
+    }
+    
+    public EventData(String event){
+        this(event, null);
     }
 
     public String getEventName(){

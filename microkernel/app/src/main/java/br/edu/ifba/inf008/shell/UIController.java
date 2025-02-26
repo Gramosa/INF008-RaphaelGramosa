@@ -1,5 +1,6 @@
 package br.edu.ifba.inf008.shell;
 
+import br.edu.ifba.inf008.interfaces.IPluginController;
 import br.edu.ifba.inf008.interfaces.IUIController;
 
 import javafx.animation.KeyFrame;
@@ -31,7 +32,8 @@ public class UIController extends Application implements IUIController {
     private MenuBar menuBar;
     private TabPane rightTabPane;
     private TabPane leftTabPane;
-    private Stage popup;
+    private Stage popupStage;
+    private VBox popupBox;
 
     // Construtor
     public UIController() {}
@@ -67,10 +69,12 @@ public class UIController extends Application implements IUIController {
         primaryStage.show();
 
         // Inicializa o popup
-        initializePopup(primaryStage);
+        initializePopupStage(primaryStage);
 
         // Inicializa o plugin controller
-        Core.getInstance().getPluginController().init();
+        IPluginController pluginController = Core.getInstance().getPluginController();
+        pluginController.init();
+        pluginController.loadAllPlugins();
     }
 
     // ---------------------- Construção da UI ----------------------
@@ -109,8 +113,8 @@ public class UIController extends Application implements IUIController {
         BorderPane rightPanel = buildRightPanel();
 
         // Proporção dos painéis
-        leftPanel.prefWidthProperty().bind(panelsHBox.widthProperty().multiply(0.65));
-        rightPanel.prefWidthProperty().bind(panelsHBox.widthProperty().multiply(0.35));
+        leftPanel.prefWidthProperty().bind(panelsHBox.widthProperty().multiply(0.6));
+        rightPanel.prefWidthProperty().bind(panelsHBox.widthProperty().multiply(0.4));
 
         panelsHBox.getChildren().addAll(leftPanel, rightPanel);
         HBox.setHgrow(panelsHBox, Priority.ALWAYS);
@@ -212,45 +216,49 @@ public class UIController extends Application implements IUIController {
 
     // ---------------------- Popup ----------------------
 
+    private void initializePopupStage(Stage ownerStage) {
+        popupStage = new Stage();
+        popupStage.initOwner(ownerStage);
+        popupStage.initStyle(StageStyle.UNDECORATED);
+        popupStage.setOpacity(0.8); // Ajuste de opacidade para a janela popup
+
+        popupBox = new VBox(10);  // Espaçamento de 10px entre os popups
+        popupBox.setStyle("-fx-background-color: black; -fx-padding: 10; -fx-border-radius: 5; -fx-background-radius: 5;");
+        popupBox.setAlignment(Pos.TOP_CENTER);
+
+        Scene popupScene = new Scene(popupBox);
+        popupStage.setScene(popupScene);
+    }
+
     public void showPopup(String contentText) {
-        Label label = (Label) popup.getScene().getRoot().lookup("#popupLabel");
-        label.setText(contentText);
+        Label label = new Label(contentText);
+        label.setStyle("-fx-text-fill: white;");
+        label.setPadding(new Insets(10));
+        label.setWrapText(true);
 
-        popup.show();
-        popup.sizeToScene();
+        // Adiciona o novo popup ao VBox
+        popupBox.getChildren().add(label);
 
-        // Ajusta a posição corretamente
-        Stage ownerStage = (Stage) popup.getOwner();
-        double x = ownerStage.getX() + ownerStage.getWidth() - popup.getWidth() - 20;
-        double y = ownerStage.getY() + ownerStage.getHeight() - popup.getHeight() - 50;
+        // Exibe o Stage
+        popupStage.show();
+        popupStage.sizeToScene();
 
-        popup.setX(x);
-        popup.setY(y);
+        // Ajusta a posição do Stage
+        double x = popupStage.getOwner().getX() + popupStage.getOwner().getWidth() - popupStage.getWidth() - 20;
+        double y = popupStage.getOwner().getY() + popupStage.getOwner().getHeight() - popupStage.getHeight() - 50;
+        popupStage.setX(x);
+        popupStage.setY(y);
 
+        // Remove o popup após 3 segundos
         Timeline timeline = new Timeline(
-            new KeyFrame(Duration.seconds(3), e -> popup.hide())
+            new KeyFrame(Duration.seconds(3), e -> {
+                popupBox.getChildren().remove(label);  // Remove o popup do VBox
+                if (popupBox.getChildren().isEmpty()) {
+                    popupStage.hide();  // Esconde o Stage quando não houver mais popups
+                }
+            })
         );
         timeline.setCycleCount(1);
         timeline.play();
-    }
-
-    private void initializePopup(Stage ownerStage) {
-        popup = new Stage();
-        popup.setTitle("Notificação");
-        popup.initOwner(ownerStage);
-        popup.initStyle(StageStyle.UNDECORATED);
-
-        Label label = new Label();
-        label.setId("popupLabel");
-        label.setPadding(new Insets(10));
-        label.setWrapText(true);
-        label.setStyle("-fx-text-fill: white;");
-
-        VBox layout = new VBox(label);
-        layout.setStyle("-fx-background-color: black; -fx-padding: 10; -fx-border-radius: 5; -fx-background-radius: 5;");
-        layout.setAlignment(Pos.CENTER);
-
-        Scene popupScene = new Scene(layout);
-        popup.setScene(popupScene);
     }
 }

@@ -12,7 +12,6 @@
         <module>interfaces</module>
         <module>events</module>
         <module>app</module>
-        <module>plugins/myplugin</module>
         <module>plugins/bookmodule</module>
         <module>plugins/usermodule</module>
         <module>plugins/loanmodule</module>

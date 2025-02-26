@@ -1,11 +1,14 @@
 package br.edu.ifba.inf008.plugins;
 
+import java.time.LocalDate;
+
 import br.edu.ifba.inf008.interfaces.ICore;
 import br.edu.ifba.inf008.interfaces.IUIController;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.VBox;
@@ -30,22 +33,26 @@ public class LoanModuleUI {
         
         TextField bookIsbnField = new TextField();
         bookIsbnField.setPromptText("Book ISBN");
+
+        DatePicker loanDatePicker = new DatePicker();
+        loanDatePicker.setPromptText("Loan date");
         
         // Botão para registrar empréstimo
         Button borrowButton = new Button("Borrow Book");
         borrowButton.setOnAction(e -> {
             String userId = userIdField.getText();
             String bookIsbn = bookIsbnField.getText();
-            if(userId.isBlank() || bookIsbn.isBlank()){
+            LocalDate loanDate = loanDatePicker.getValue();
+            if(userId.isBlank() || bookIsbn.isBlank() || loanDatePicker.getValue() == null){
                 uiController.showPopup("All fields must be given!");
             }
-            else if (loanModule.addLoan(Integer.parseInt(userId), bookIsbn)) {
+            else if (loanModule.addLoan(Integer.parseInt(userId), bookIsbn, loanDate)) {
                 uiController.showPopup("Loan registered successfully!");
             }
         });
         
         // Layout da aba
-        VBox layout = new VBox(10, userIdField, bookIsbnField, borrowButton);
+        VBox layout = new VBox(10, userIdField, bookIsbnField, loanDatePicker, borrowButton);
         layout.setPadding(new Insets(10));
         layout.setAlignment(Pos.CENTER);
         
