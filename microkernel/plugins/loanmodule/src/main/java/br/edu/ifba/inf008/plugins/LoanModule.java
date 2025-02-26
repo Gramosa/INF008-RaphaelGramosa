@@ -11,6 +11,7 @@ import br.edu.ifba.inf008.interfaces.IEventData;
 import br.edu.ifba.inf008.interfaces.IUIController;
 
 import java.io.Serializable;
+import java.net.URLClassLoader;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,8 +69,8 @@ public class LoanModule implements IPlugin, IPluginListener, IPluginSerializatio
 
     @Override
     @SuppressWarnings("unchecked")
-    public void loadData() {
-        HashMap<String, Serializable> pluginData = load(fileName);
+    public void loadData(URLClassLoader ulc) {
+        HashMap<String, Serializable> pluginData = load(fileName, ulc);
         if(pluginData.isEmpty()){
             return;
         }
@@ -88,10 +89,12 @@ public class LoanModule implements IPlugin, IPluginListener, IPluginSerializatio
             return false;
         }
         
+        // Valida se o modulo de User esta funcional
         if(!checkEntityExistence(new EventData<>("get_user", userId), userId.toString(), "User")){
             return false;
         }
 
+        // Valida se o modulo de Book esta funcional
         if(!checkEntityExistence(new EventData<>("get_book", bookIsbn), bookIsbn, "Book")){
             return false;
         }

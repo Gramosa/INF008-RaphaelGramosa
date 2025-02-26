@@ -6,6 +6,7 @@ import br.edu.ifba.inf008.interfaces.IPluginListener;
 import br.edu.ifba.inf008.interfaces.IPluginSerialization;
 
 import java.io.Serializable;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -58,8 +59,8 @@ public class UserModule implements IPlugin, IPluginListener, IPluginSerializatio
 
     @Override
     @SuppressWarnings("unchecked")
-    public void loadData() {
-        HashMap<String, Serializable> pluginData = load(fileName);
+    public void loadData(URLClassLoader ulc) {
+        HashMap<String, Serializable> pluginData = load(fileName, ulc);
         if(pluginData.isEmpty()){
             return;
         }

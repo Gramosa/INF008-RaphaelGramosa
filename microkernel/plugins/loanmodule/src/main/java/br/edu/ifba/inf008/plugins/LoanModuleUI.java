@@ -99,7 +99,12 @@ public class LoanModuleUI {
         // Botão para gerar relatório
         Button generateReportButton = new Button("Show Transactions");
         generateReportButton.setOnAction(e -> {
-            Integer userId = Integer.parseInt(userIdField.getText());
+            String userIdString = userIdField.getText();
+            if(userIdString.isBlank()){
+                uiController.showPopup("Type a valid id!");
+                return;
+            }
+            Integer userId = Integer.parseInt(userIdString);
             boolean active = activeLoansCheck.isSelected();
             boolean notActive = archivedLoansCheck.isSelected();
             

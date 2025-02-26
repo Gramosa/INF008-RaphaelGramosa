@@ -18,6 +18,7 @@ public class PluginController implements IPluginController
 {
     private final ArrayList<IPluginSerialization> serializablePlugins = new ArrayList<>();
     private final HashMap<String, IPluginListener> listeners = new HashMap<>(); //event, listeners
+    private URLClassLoader ulc;
 
     public boolean init() {
         try {
@@ -38,14 +39,15 @@ public class PluginController implements IPluginController
             {
                 jars[i] = (new File("./plugins/" + plugins[i])).toURL();
             }
-            URLClassLoader ulc = new URLClassLoader(jars, App.class.getClassLoader());
+            ulc = new URLClassLoader(jars, App.class.getClassLoader());
+            
+            //Thread.currentThread().setContextClassLoader(ulc);
+            
             for (i = 0; i < plugins.length; i++)
             {
                 String pluginName = plugins[i].split("\\.")[0];
                 IPlugin plugin = (IPlugin) Class.forName("br.edu.ifba.inf008.plugins." + pluginName, true, ulc).newInstance();
                 plugin.init();
-
-                System.out.println(pluginName);
 
                 if (plugin instanceof IPluginSerialization) {
                     IPluginSerialization serializablePlugin = (IPluginSerialization) plugin;
@@ -80,7 +82,7 @@ public class PluginController implements IPluginController
 
     public void loadAllPlugins(){
         for(IPluginSerialization plugin : serializablePlugins){
-            plugin.loadData();
+            plugin.loadData(ulc);
         }
     }
 
